@@ -48,6 +48,7 @@ def main():
             try:
                 updated = update_business_days()
                 send_slack_msg(f'Successfully updated {updated}')
+                time.sleep(60)  # to prevent running twice
             except Exception as e:
                 logging.critical(f'Update Failed. {e}')
                 send_slack_msg(f'Error: {e}')
