@@ -42,7 +42,7 @@ def main():
     send_slack_msg('Script has been initiated')
     while True:
         now = datetime.utcnow()
-        is_correct_time = now.hour == 0 and now.minute == 31  # HKT 4:30pm
+        is_correct_time = now.hour == 8 and now.minute == 31  # HKT 4:30pm
         is_weekday = now.weekday() < 5
         if is_correct_time and is_weekday:
             try:
