@@ -56,5 +56,31 @@ def append_to_business_days(date: int):
     update_last_update_i(i)
 
 
+def fetch_stock_details():
+    url = f'{constants.FIREBASE_DATABASE_URL}/stocks.json'
+    resp = fetch(url)
+    return resp
+
+
+def initiate_database(data: Dict):
+    url = f'{constants.FIREBASE_DATABASE_URL}/stocks.json'
+    logging.debug(f'Putting data to {url}')
+    start = False
+    for key, value in data.items():
+        if key == '0405':
+            start = True
+        if not start:
+            continue
+        url = f'{constants.FIREBASE_DATABASE_URL}/stocks/{key}.json'
+        resp = requests.put(url, json=value)
+        if resp.status_code >= 400:
+            raise RuntimeError(resp.text)
+    logging.debug(f'Successfully put data to {url}')
+
+
 if __name__ == '__main__':
-    print(fetch_last_update_i())
+    import hkex
+
+    obj = hkex.fetch_stock_details_from_hkex()
+    initiate_database(obj)
+    print(fetch_stock_details())
