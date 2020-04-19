@@ -1,55 +1,68 @@
-from typing import Dict
-import logging
+from typing import Dict, Union
 import json
-import requests
+import logging
+import os
 
-import constants
+import firebase_admin
+from firebase_admin import credentials
+from firebase_admin import db
 
 logging.basicConfig(level=logging.DEBUG, format="%(asctime)s:%(levelname)s: %(message)s")
+
+SECRET_KEY = os.environ.get('SECRET_KEY')
+
+if SECRET_KEY is None:
+    with open('../hkportfolioanalysis-dev-firebase-adminsdk-ivty2-235716019a.json') as f:
+        SECRET_KEY = json.load(f)
+else:
+    SECRET_KEY = json.loads(SECRET_KEY)
+
+CRED = credentials.Certificate(SECRET_KEY)
+
+firebase_admin.initialize_app(CRED, {
+    'databaseURL': r'https://hkportfolioanalysis-dev.firebaseio.com'
+})
 
 
 def patch(url: str, data: Dict):
     logging.info(f'Patching {data} to {url}')
-    data = json.dumps(data)
-    resp = requests.patch(url, data=data)
-    if resp.status_code >= 400:
-        raise RuntimeError(resp.text)
+    ref = db.reference(url)
+    ref.update(data)
     logging.info(f'Successfully patched {data} to {url}')
 
 
-def fetch(url: str) -> str:
+def fetch(url: str) -> Union[str, int, float]:
     logging.info(f'Fetching {url}')
-    resp = requests.get(url).json()
-    logging.info(f'Successfully fetched {url}')
+    ref = db.reference(url)
+    resp = ref.get()
+    logging.info(f'Successfully fetched {url}: {resp}')
     return resp
 
 
 def update_last_update(last_update: int):
-    url = f'{constants.FIREBASE_DATABASE_URL}/businessDays.json'
+    url = r'businessDays'
     data = {'lastUpdate': last_update}
     patch(url, data)
 
 
 def update_last_update_i(last_update_i: int):
-    url = f'{constants.FIREBASE_DATABASE_URL}/businessDays.json'
+    url = r'businessDays'
     data = {'lastUpdate_i': last_update_i}
     patch(url, data)
 
 
 def fetch_last_update() -> int:
-    url = f'{constants.FIREBASE_DATABASE_URL}/businessDays/lastUpdate.json'
-    resp = fetch(url)
+    resp = fetch('businessDays/lastUpdate')
     return int(resp)
 
 
 def fetch_last_update_i() -> int:
-    url = f'{constants.FIREBASE_DATABASE_URL}/businessDays/lastUpdate_i.json'
-    resp = fetch(url)
+    resp = fetch('businessDays/lastUpdate_i')
     return int(resp)
 
 
 def append_to_business_days(date: int):
-    url = f'{constants.FIREBASE_DATABASE_URL}/businessDays/data.json'
+    url = 'businessDays/data.json'
     i = fetch_last_update_i() + 1
     patch(url, {i: date})
     update_last_update(date)
@@ -57,30 +70,23 @@ def append_to_business_days(date: int):
 
 
 def fetch_stock_details():
-    url = f'{constants.FIREBASE_DATABASE_URL}/stocks.json'
-    resp = fetch(url)
+    resp = fetch('stocks')
     return resp
 
 
 def initiate_database(data: Dict):
-    url = f'{constants.FIREBASE_DATABASE_URL}/stocks.json'
-    logging.debug(f'Putting data to {url}')
+    logging.debug(f'Putting data to /stocks')
     start = False
     for key, value in data.items():
         if key == '0405':
             start = True
         if not start:
             continue
-        url = f'{constants.FIREBASE_DATABASE_URL}/stocks/{key}.json'
-        resp = requests.put(url, json=value)
-        if resp.status_code >= 400:
-            raise RuntimeError(resp.text)
+        url = f'stocks/{key}'
+        ref = db.reference(url)
+        ref.set(value)
     logging.debug(f'Successfully put data to {url}')
 
 
 if __name__ == '__main__':
-    import hkex
-
-    obj = hkex.fetch_stock_details_from_hkex()
-    initiate_database(obj)
-    print(fetch_stock_details())
+    print(fetch_last_update())

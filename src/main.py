@@ -9,13 +9,11 @@ import time
 from dotenv import load_dotenv
 
 try:
-    from . import constants
     from . import aastock
     from . import firebase
     from . import hkex
 
 except ImportError:
-    import constants
     import aastock
     import firebase
     import hkex
@@ -77,6 +75,7 @@ def update_stock_details_scheduler():
 
 def main():
     load_dotenv()
+    print('Testing Firebase connection...', firebase.fetch_last_update())
     send_slack_msg('Script has been initiated')
     while True:
         update_business_days_scheduler()
