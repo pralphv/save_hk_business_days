@@ -1,3 +1,6 @@
+from dotenv import load_dotenv
+load_dotenv()
+
 from typing import List
 from datetime import datetime
 import json
@@ -6,7 +9,6 @@ import os
 import requests
 import time
 
-from dotenv import load_dotenv
 
 try:
     from . import aastock
@@ -74,7 +76,6 @@ def update_stock_details_scheduler():
 
 
 def main():
-    load_dotenv()
     print('Testing Firebase connection...', firebase.fetch_last_update())
     send_slack_msg('Script has been initiated')
     while True:
