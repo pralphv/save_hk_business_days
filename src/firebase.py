@@ -11,18 +11,18 @@ logging.basicConfig(level=logging.DEBUG, format="%(asctime)s:%(levelname)s: %(me
 
 SECRET_KEY = os.environ.get('SECRET_KEY')
 
-print(SECRET_KEY)
-
 if SECRET_KEY is None:
     with open('../hkportfolioanalysis-dev-firebase-adminsdk-ivty2-235716019a.json') as f:
         SECRET_KEY = json.load(f)
+    DATABASE_URL = r'https://hkportfolioanalysis-dev.firebaseio.com'
 else:
     SECRET_KEY = json.loads(SECRET_KEY)
+    DATABASE_URL = r'https://hkportfolioanalysis.firebaseio.com'
 
 CRED = credentials.Certificate(SECRET_KEY)
 
 firebase_admin.initialize_app(CRED, {
-    'databaseURL': r'https://hkportfolioanalysis-dev.firebaseio.com'
+    'databaseURL': DATABASE_URL
 })
 
 
