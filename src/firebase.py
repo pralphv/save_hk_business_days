@@ -11,6 +11,8 @@ logging.basicConfig(level=logging.DEBUG, format="%(asctime)s:%(levelname)s: %(me
 
 SECRET_KEY = os.environ.get('SECRET_KEY')
 
+print(SECRET_KEY)
+
 if SECRET_KEY is None:
     with open('../hkportfolioanalysis-dev-firebase-adminsdk-ivty2-235716019a.json') as f:
         SECRET_KEY = json.load(f)
