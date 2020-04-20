@@ -64,7 +64,7 @@ def fetch_last_update_i() -> int:
 
 
 def append_to_business_days(date: int):
-    url = 'businessDays/data.json'
+    url = 'businessDays/data'
     i = fetch_last_update_i() + 1
     patch(url, {i: date})
     update_last_update(date)
@@ -91,4 +91,4 @@ def initiate_database(data: Dict):
 
 
 if __name__ == '__main__':
-    print(fetch_last_update())
+    append_to_business_days(20200420)
